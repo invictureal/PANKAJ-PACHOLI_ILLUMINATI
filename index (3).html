@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dealer Watch: which dealers need management attention</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b2330;--mu:#5b6676;--bd:#dfe3ea;--ac:#1f5eff;--w:#b7791f;--c:#d9480f;--k:#c92a2a;--ok:#2b8a3e}
+@media(prefers-color-scheme:dark){:root{--bg:#12151b;--card:#1b2029;--tx:#e8ecf2;--mu:#98a3b5;--bd:#2c3340;--ac:#6b93ff;--w:#e0a43c;--c:#ff8a4c;--k:#ff6b6b;--ok:#5fcf7a}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,Segoe UI,Arial,sans-serif;background:var(--bg);color:var(--tx)}
+header{padding:14px 20px;background:var(--card);border-bottom:1px solid var(--bd)}h1{font-size:20px;margin:0}header p{margin:2px 0 0;color:var(--mu);font-size:13px}
+nav{display:flex;gap:6px;flex-wrap:wrap;padding:10px 20px}nav a{padding:6px 12px;border:1px solid var(--bd);border-radius:20px;color:var(--tx);text-decoration:none;background:var(--card);font-size:14px}nav a.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+main{padding:0 20px 40px;max-width:1200px;margin:auto}.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:14px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin-bottom:14px}.kpi b{display:block;font-size:22px}.kpi span{color:var(--mu);font-size:12px}
+.ctl{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;font-size:13px}.ctl input[type=range]{width:100%}
+table{width:100%;border-collapse:collapse;font-size:13px}th,td{padding:7px 6px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}th{color:var(--mu);font-weight:600}tr.row{cursor:pointer}tr.row:hover{background:var(--bg)}
+.chip{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;margin:1px;border:1px solid}
+.s0{color:var(--ok);border-color:var(--ok)}.s1{color:var(--w);border-color:var(--w)}.s2{color:var(--c);border-color:var(--c)}.s3{color:#fff;background:var(--k);border-color:var(--k)}
+.tier{font-weight:700}.t1{color:var(--k)}.t2{color:var(--c)}.t3{color:var(--w)}.tO{color:var(--ac)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}.grid svg{width:100%;height:auto}
+select,button{font:inherit;padding:5px 9px;border:1px solid var(--bd);border-radius:6px;background:var(--card);color:var(--tx)}button{cursor:pointer}
+.mu{color:var(--mu);font-size:12px}.tag{background:var(--k);color:#fff;border-radius:4px;padding:0 6px;font-size:11px}ul{margin:4px 0;padding-left:20px}.sc{overflow-x:auto}
+</style></head><body>
+<header><h1>Dealer Watch</h1><p>Which dealers need management attention, why, and what to do. Synthetic demo data (49 dealers, Oct 2025 to Sep 2026).</p></header>
+<nav id="nav"></nav><main id="app"></main>
+<script>
+// ---------- synthetic ERP-style data (seeded, reproducible) ----------
+function rng(a){return()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const rnd=rng(42),nz=s=>(rnd()-.5)*2*s;
+const REG=['North','South','East','West'],MGR=['A. Rao','S. Iyer','P. Das','M. Khan'],CITY=['Pune','Jaipur','Kochi','Patna','Surat','Indore','Nagpur','Ranchi','Mysuru','Vizag','Kanpur','Raipur'];
+const MON=['Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep'];
+const arche=i=>i<25?'H':i<30?'OS':i<35?'FS':i<39?'SV':i<43?'WM':i<47?'SD':i==47?'EX':'DI';
+const DL=[];
+for(let i=0;i<49;i++){const a=arche(i),T=20+Math.floor(rnd()*40),cat=T>45?'A':T>30?'B':'C',unit=(5+rnd()*6)*1e5,cl=T*12e5,share0=.12+rnd()*.05,mk0=T/share0,m=[];
+ for(let k=0;k<12;k++){const p=k/11;
+  let ach=1+nz(.06),wr=1.02,ful=1,s60=.12+nz(.04),od=1+rnd()*1.5,odD=0,cpv=3+nz(.7),clo=4+nz(.5),mkt=mk0*(1+.01*k)*(1+nz(.02));
+  if(a=='OS'){ach=1.03+nz(.05);wr=1.25+.35*p;s60=.2+.4*p;od=2+4*p}
+  if(a=='FS'){ach=.9+nz(.04);s60=.25+.35*p;od=4+20*p}
+  if(a=='SV'){ach=.72+nz(.04);ful=.6+nz(.05);s60=.05+nz(.02)}
+  if(a=='WM'){ach=.9-.2*p+nz(.03);mkt=mk0*(1-.25*p)*(1+nz(.02))}
+  if(a=='SD'){cpv=3+9*p+nz(.5);clo=4+8*p}
+  if(a=='EX'){ach=.78-.08*p+nz(.03)}
+  if(a=='DI'){od=1.5;odD=11}
+  const ret=Math.round(T*ach),ord=a=='SV'?Math.round(T*1.05):Math.round(ret*wr),rec=Math.round(ord*ful),wh=rec;
+  m.push({ret,tgt:T,wh,ord,rec,s60,od,odD,cpv,clo,mkt:Math.round(mkt),share:ret/mkt*100});}
+ DL.push({id:'D'+String(i+1).padStart(3,'0'),name:CITY[i%12]+' Motors '+String.fromCharCode(65+Math.floor(i/12)),region:REG[i%4],mgr:MGR[i%4],cat,T,unit,cl,m,key:a});}
+const KEY={H:'Healthy',OS:'Growing but overstocked',FS:'Financially stressed',SV:'Supply victim',WM:'Weak market',SD:'Service deterioration',EX:'Genuine execution weakness',DI:'Disputed invoice (not stress)'};
+const med=a=>{const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)]};
+const medCpv=MON.map((_,k)=>med(DL.map(d=>d.m[k].cpv)));
+
+// ---------- engine ----------
+const CFG={achW:90,s60W:25,odW:5,rate:10,bank:80};
+const sevHi=(v,w,c,k)=>v>k?3:v>c?2:v>w?1:0;
+const sevLo=(v,w,c,k)=>v<k?3:v<c?2:v<w?1:0;
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0),avg=(a,f)=>sum(a,f)/a.length;
+const run=(d,i)=>{
+ const S=[[],[],[],[]];
+ d.m.forEach((x,k)=>{
+  S[0].push(Math.max(sevLo(x.ret/x.tgt*100,CFG.achW,CFG.achW-10,CFG.achW-20),x.wh/Math.max(x.ret,1)>1.3?1:0));
+  S[1].push(sevHi(x.s60*100,CFG.s60W,CFG.s60W+10,CFG.s60W+25));
+  S[2].push(sevHi(x.od,CFG.odW,CFG.odW*2,CFG.odW*4));
+  S[3].push((r=>r>=3?3:r>=2?2:r>=1.5?1:0)(x.cpv/medCpv[k]));});
+ const run_=(a,t)=>{let n=0;for(let k=11;k>=0&&a[k]>=t;k--)n++;return n};
+ const trend=a=>{const x=avg(a.slice(9),v=>v)-avg(a.slice(6,9),v=>v);return x>.34?'↑':x<-.34?'↓':'→'};
+ const cur=S.map(a=>a[11]),per=S.map(a=>run_(a,1)),tr=S.map(trend);
+ const L=d.m.slice(9),F=d.m.slice(0,3),l=d.m[11];
+ const ach=sum(L,x=>x.ret)/sum(L,x=>x.tgt)*100,fulf=sum(L,x=>x.rec)/sum(L,x=>x.ord),mg=avg(L,x=>x.mkt)/avg(F,x=>x.mkt)-1,sh=avg(L,x=>x.share)/avg(F,x=>x.share)-1,whr=sum(L,x=>x.wh)/Math.max(sum(L,x=>x.ret),1),s60r=l.s60-avg(F,x=>x.s60);
+ let cause='',ev='';
+ if(cur[0]>0){
+  if(ach<CFG.achW){
+   if(fulf<.75){cause='SUPPLY-CONSTRAINED';ev='Order fulfilment '+(fulf*100).toFixed(0)+'% (below 75%) while retail is '+ach.toFixed(0)+'% of target'}
+   else if(mg<-.07&&sh>-.05){cause='WEAK MARKET';ev='Territory registrations '+(mg*100).toFixed(0)+'%, dealer share steady ('+(sh*100).toFixed(0)+'%)'}
+   else if(sh<-.07&&fulf>=.75){cause='DEALER EXECUTION';ev='Supply OK ('+(fulf*100).toFixed(0)+'% fulfilled), market stable, share down '+(sh*100).toFixed(0)+'%'}
+   else{cause='INCONCLUSIVE';ev='Signals conflict: fulfilment '+(fulf*100).toFixed(0)+'%, market '+(mg*100).toFixed(0)+'%, share '+(sh*100).toFixed(0)+'%'}}
+  else if(whr>1.2&&s60r>.05){cause='OEM-PUSHED STOCK';ev='Wholesale is '+whr.toFixed(2)+'x retail, stock over 60 days up '+(s60r*100).toFixed(0)+' pts, orders fulfilled'}}
+ const stock=d.T*1.5,aged60=stock*l.s60*d.unit,aged90=aged60*.55,odND=l.od/100*d.cl,odDisp=l.odD/100*d.cl,exp=aged60+odND;
+ const carry=aged60*(CFG.rate/100)*(CFG.bank/100)*30/365;
+ return{d,S,cur,per,tr,cause,ev,aged60,aged90,odND,odDisp,exp,carry,ach,fulf,mg,sh,hidden:l.ret/l.tgt>=1&&(cur[1]>=2||cur[2]>=1)};};
+function triage(){
+ let R=DL.map(run);const ex=R.map(r=>r.exp).sort((a,b)=>a-b),p90=ex[Math.floor(ex.length*.9)];
+ R.forEach(r=>{const n2=r.cur.filter(v=>v>=2).length,crit=Math.max(...r.S.map(a=>{let n=0;for(let k=11;k>=0&&a[k]>=3;k--)n++;return n})),c2=Math.max(...r.S.map(a=>{let n=0;for(let k=11;k>=0&&a[k]>=2;k--)n++;return n})),any=r.cur.some(v=>v>0);
+  let t=0;if(n2>=2||crit>=3||(r.exp>=p90&&any))t=1;else if(c2>=2)t=2;else if(any)t=3;
+  if(r.cur[1]>=1&&r.cur[2]>=1&&r.tr[2]=='↑'&&t>1&&t<=3)t--;
+  r.oem=(r.cause=='SUPPLY-CONSTRAINED'||r.cause=='WEAK MARKET')&&r.cur[1]<2&&r.cur[2]<2&&r.cur[3]<2;
+  r.tier=r.oem?'OEM':t;r.acts=actions(r);});
+ return R.sort((a,b)=>(a.tier=='OEM'?0.5:a.tier||9)-(b.tier=='OEM'?0.5:b.tier||9)||b.exp-a.exp);}
+function actions(r){const A=[],Q=[];
+ if(r.cause=='SUPPLY-CONSTRAINED'){A.push(['OEM','Escalate to OEM planning: raise allocation and fix dispatch gap']);Q.push('Which models were under-supplied? Is there booked demand waiting?')}
+ if(r.cause=='WEAK MARKET'){A.push(['OEM','Re-baseline the retail target for local demand; review territory potential']);Q.push('Has the territory shrunk, and is the target still fair?')}
+ if(r.cause=='DEALER EXECUTION'){A.push(['Corrective','Sales process review: lead follow-up, showroom and staff audit']);Q.push('Why is share falling when supply and market are fine?')}
+ if(r.cause=='OEM-PUSHED STOCK'){A.push(['OEM','Reset wholesale allocation to match retail pace']);Q.push('Did OEM volume goals push stock beyond retail demand?')}
+ if(r.cur[1]>=1){A.push(['Support','Stock liquidation support or inter-dealer transfer for vehicles over 60 days']);Q.push('Which models are ageing, and why are they not selling?')}
+ if(r.cur[2]>=1){A.push(['Corrective','Agreed payment plan and credit-limit review']);Q.push('Is overdue a cash-flow issue or an admin delay? Any open disputes?')}
+ if(r.cur[3]>=1){A.push(['Corrective','Service quality audit and complaint closure plan']);Q.push('Which complaint categories are repeating, and why are closures slow?')}
+ if(r.hidden){A.unshift(['Corrective','HIDDEN RISK: sales look fine but stock and payments are slipping; review before it becomes a loss']);}
+ return{A,Q}}
+// ---------- helpers ----------
+const inr=v=>v>=1e7?'₹'+(v/1e7).toFixed(2)+' Cr':'₹'+(v/1e5).toFixed(1)+' L';
+const lab=['Watch','Concern','Critical'],cat=['Sales','Inventory','Financial','Customer'],ic=['✓','!','!!','!!!'];
+const chip=(s,t,p)=>`<span class="chip s${s}" title="${lab[s-1]||'No flag'}">${ic[s]} ${s?lab[s-1]:'OK'} ${s?t:''}${s&&p?' · '+p+'m':''}</span>`;
+function line(series,w=320,h=150){const all=series.flatMap(s=>s.v),mx=Math.max(...all)*1.1||1,mn=Math.min(0,...all),X=k=>30+k*(w-40)/11,Y=v=>h-22-(v-mn)/(mx-mn)*(h-40);
+ let s=`<svg viewBox="0 0 ${w} ${h}"><line x1="30" y1="${h-22}" x2="${w-8}" y2="${h-22}" stroke="currentColor" opacity=".3"/><text x="2" y="14" font-size="9" fill="currentColor" opacity=".7">${mx.toFixed(0)}</text>`;
+ [0,5,11].forEach(k=>s+=`<text x="${X(k)-8}" y="${h-8}" font-size="9" fill="currentColor" opacity=".7">${MON[k]}</text>`);
+ series.forEach((q,j)=>{s+=`<polyline fill="none" stroke="${q.c}" stroke-width="2" ${q.dash?'stroke-dasharray="4 3"':''} points="${q.v.map((v,k)=>X(k)+','+Y(v)).join(' ')}"/><text x="${34+j*78}" y="${h-1}" font-size="9" fill="${q.c}">${q.n}</text>`});return s+'</svg>'}
+let VIEW={tab:'all',region:'All',tier:'All'};
+// ---------- pages ----------
+function pTriage(){const R=triage(),dl=R.filter(r=>r.tier!='OEM'&&r.tier),oem=R.filter(r=>r.tier=='OEM'),T=n=>dl.filter(r=>r.tier==n).length;
+ const a60=sum(R,r=>r.aged60),a90=sum(R,r=>r.aged90),od=sum(R,r=>r.odND),car=sum(R,r=>r.carry),sens=b=>sum(R,r=>r.aged60)*(CFG.rate/100)*(b/100)*30/365;
+ const rows=(VIEW.tab=='oem'?oem:R.filter(r=>r.tier!='OEM')).filter(r=>(VIEW.region=='All'||r.d.region==VIEW.region)&&(VIEW.tier=='All'||String(r.tier)==VIEW.tier));
+ const sl=(k,lbl,mn,mx,st)=>`<label>${lbl}: <b id="v${k}">${CFG[k]}</b><input type="range" min="${mn}" max="${mx}" step="${st}" value="${CFG[k]}" oninput="CFG.${k}=+this.value;render()"></label>`;
+ return`<div class="card"><b>The question:</b> sales alone hide trouble. This page separates <i>what is wrong</i> (4 flags), <i>how big</i> (₹ exposure), <i>why</i> (supply, market or dealer) and <i>how urgent</i> (tier + months persisted).</div>
+ <div class="kpis"><div class="card kpi"><b>${T(1)} / ${T(2)} / ${T(3)}</b><span>Dealers in Tier 1 (this week) / 2 (this month) / 3 (monitor)</span></div>
+ <div class="card kpi"><b>${inr(a60)}</b><span>Locked in stock over 60 days (ex-GST cost)</span></div><div class="card kpi"><b>${inr(a90)}</b><span>Of which over 90 days (est.)</span></div>
+ <div class="card kpi"><b>${inr(od)}</b><span>Overdue, excluding disputed invoices</span></div>
+ <div class="card kpi"><b>${inr(car)}/mo</b><span>Est. carrying cost of aged stock. At 70/30: ${inr(sens(70))}, 90/10: ${inr(sens(90))}</span></div>
+ <div class="card kpi"><b>${oem.length}</b><span>OEM-side cases (supply or weak market), not dealer warnings</span></div></div>
+ <div class="card"><b>Adjust thresholds (all judgment-based)</b><div class="ctl">${sl('achW','Retail achievement Watch below (%)',70,100,1)}${sl('s60W','Stock >60 days Watch above (%)',10,50,1)}${sl('odW','Overdue Watch above (% of credit limit)',2,15,1)}${sl('rate','Interest rate (% a year)',6,16,.5)}${sl('bank','Bank-financed share (%)',60,95,5)}</div></div>
+ <div class="card"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button onclick="VIEW.tab='all';render()" ${VIEW.tab=='all'?'style="border-color:var(--ac)"':''}>Dealer actions (${dl.length+R.filter(r=>r.tier===0).length>0?R.length-oem.length:0})</button><button onclick="VIEW.tab='oem';render()" ${VIEW.tab=='oem'?'style="border-color:var(--ac)"':''}>OEM-side actions (${oem.length})</button>
+ <select onchange="VIEW.region=this.value;render()">${['All',...REG].map(x=>`<option ${x==VIEW.region?'selected':''}>${x}</option>`)}</select>
+ <select onchange="VIEW.tier=this.value;render()">${['All','1','2','3','0'].map(x=>`<option value="${x}" ${x==VIEW.tier?'selected':''}>${x=='All'?'All tiers':x=='0'?'Healthy':'Tier '+x}</option>`)}</select><button onclick="dl_csv()">Download CSV</button></div>
+ <div class="sc"><table><tr><th>Tier</th><th>Dealer</th><th>Flags (trend, months persisted)</th><th>Exposure</th><th>Likely cause (evidence)</th><th>First action</th></tr>
+ ${rows.map(r=>`<tr class="row" onclick="location.hash='#dealer/${r.d.id}'"><td class="tier t${r.tier=='OEM'?'O':r.tier}">${r.tier=='OEM'?'OEM':r.tier?'Tier '+r.tier:'Healthy'}</td><td><b>${r.d.name}</b><br><span class="mu">${r.d.id} · ${r.d.region} · ${r.d.mgr}</span>${r.hidden?'<br><span class="tag">HIDDEN RISK</span>':''}</td>
+ <td>${cat.map((c,i)=>chip(r.cur[i],c+' '+r.tr[i],r.per[i])).join('')}</td><td>${inr(r.exp)}</td><td>${r.cause||'-'}<br><span class="mu">${r.ev}</span></td><td>${r.acts.A[0]?'<b>'+r.acts.A[0][0]+':</b> '+r.acts.A[0][1]:'Monitor'}</td></tr>`).join('')}</table></div>
+ <p class="mu">Click a dealer for the full story. Flags are evidence for a conversation, not proof of cause.</p></div>`}
+function dl_csv(){const R=triage(),h='dealer,name,region,tier,exposure_inr,cause,action\n',b=R.map(r=>[r.d.id,r.d.name,r.d.region,r.tier||'Healthy',Math.round(r.exp),r.cause,(r.acts.A[0]||['',''])[1]].map(x=>'"'+x+'"').join(',')).join('\n'),a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h+b],{type:'text/csv'}));a.download='dealer_triage.csv';a.click()}
+function pDealer(id){const R=triage(),r=R.find(x=>x.d.id==id)||R[0],d=r.d,m=d.m,sel=`<select onchange="location.hash='#dealer/'+this.value">${R.map(x=>`<option value="${x.d.id}" ${x.d.id==d.id?'selected':''}>${x.d.id} ${x.d.name}</option>`)}</select>`;
+ const why=[['Sales: retail vs target (last 3 months)',r.ach.toFixed(0)+'%','Watch below '+CFG.achW+'%, Concern '+(CFG.achW-10)+'%, Critical '+(CFG.achW-20)+'%'],['Inventory: stock over 60 days',(m[11].s60*100).toFixed(0)+'%','Watch above '+CFG.s60W+'%, Concern '+(CFG.s60W+10)+'%, Critical '+(CFG.s60W+25)+'%'],['Financial: overdue, excl. disputed',m[11].od.toFixed(1)+'% of credit limit','Watch above '+CFG.odW+'%, Concern '+CFG.odW*2+'%, Critical '+CFG.odW*4+'%'],['Customer: complaints per 100 visits',m[11].cpv.toFixed(1)+' (network median '+medCpv[11].toFixed(1)+')','Watch 1.5x, Concern 2x, Critical 3x median']];
+ return`<div class="card">${sel}<h2 style="margin:10px 0 2px">${d.name} <span class="mu">${d.id} · ${d.region} · Category ${d.cat} · ${d.mgr}</span></h2>
+ <div class="tier t${r.tier=='OEM'?'O':r.tier}" style="font-size:18px">${r.tier=='OEM'?'OEM-side action':r.tier?'Tier '+r.tier+' (review '+['','this week','this month','as monitoring'][r.tier]+')':'Healthy'} ${r.hidden?'<span class="tag">HIDDEN RISK</span>':''}</div>
+ <p>Exposure <b>${inr(r.exp)}</b> (aged stock ${inr(r.aged60)} + overdue ${inr(r.odND)}). Carrying cost about ${inr(r.carry)}/month.${r.odDisp>0?` Disputed ${inr(r.odDisp)} excluded from payment stress.`:''}<br>Likely cause: <b>${r.cause||'no sales flag'}</b> <span class="mu">${r.ev}</span></p>
+ <b>Recommended actions</b><ul>${r.acts.A.map(a=>`<li><b>${a[0]}:</b> ${a[1]}</li>`).join('')||'<li>No action. Keep monitoring.</li>'}</ul><b>What to check first</b><ul>${r.acts.Q.map(q=>`<li>${q}</li>`).join('')||'<li>-</li>'}</ul></div>
+ <div class="card"><b>Why was this dealer flagged?</b><div class="sc"><table><tr><th>Trigger</th><th>Value</th><th>Rule</th><th>Status</th></tr>${why.map((w,i)=>`<tr><td>${w[0]}</td><td>${w[1]}</td><td>${w[2]}</td><td>${chip(r.cur[i],cat[i]+' '+r.tr[i],r.per[i])}</td></tr>`).join('')}</table></div></div>
+ <div class="grid"><div class="card"><b>Retail vs target vs wholesale</b>${line([{n:'Retail',v:m.map(x=>x.ret),c:'#2b8a3e'},{n:'Target',v:m.map(x=>x.tgt),c:'#888',dash:1},{n:'Wholesale',v:m.map(x=>x.wh),c:'#d9480f'}])}</div>
+ <div class="card"><b>Orders vs received (supply)</b>${line([{n:'Ordered',v:m.map(x=>x.ord),c:'#888',dash:1},{n:'Received',v:m.map(x=>x.rec),c:'#1f5eff'}])}</div>
+ <div class="card"><b>Stock over 60 days (%) and overdue (% of limit)</b>${line([{n:'Stock>60d',v:m.map(x=>x.s60*100),c:'#d9480f'},{n:'Overdue',v:m.map(x=>x.od),c:'#c92a2a'}])}</div>
+ <div class="card"><b>Complaints per 100 visits vs median</b>${line([{n:'Dealer',v:m.map(x=>x.cpv),c:'#c92a2a'},{n:'Median',v:medCpv,c:'#888',dash:1}])}</div>
+ <div class="card"><b>Territory market vs dealer share (%)</b>${line([{n:'Market/10',v:m.map(x=>x.mkt/10),c:'#888',dash:1},{n:'Share%',v:m.map(x=>x.share),c:'#1f5eff'}])}</div></div>`}
+const pHow=()=>`<div class="card"><h2>How the model works</h2><p>Four questions: <b>Detect</b> (is something unusual?), <b>Size</b> (how much ₹ is at stake?), <b>Attribute</b> (dealer, market or OEM supply?), <b>Prioritise</b> (how persistent and urgent?).</p>
+<p><b>Causal chain:</b> supply / market / dealer execution → weak retail → stock builds up → stock ages → capital locked → payment stress. Sales is the symptom; ageing stock and overdue money are the costly end.</p>
+<p><b>Data flow:</b> ERP extracts (targets, orders, dispatch, receipts, VIN stock, receivables, service, complaints, market registrations) → monthly metrics → four separate flags → cause check → exposure and tier → recommended action.</p>
+<h3>Four separate flags, not one score</h3><p>A single score hides <i>why</i>. Ageing stock with healthy finances means monitor; the same ageing with rising overdue means escalate. Separate flags keep each reason visible.</p>
+<h3>Rules (all adjustable on the Triage page)</h3><ul><li><b>Sales:</b> retail ÷ target below threshold, or wholesale running well ahead of retail. Wholesale is never counted as sales.</li><li><b>Inventory:</b> share of VIN stock older than 60 days (receipt date to snapshot).</li><li><b>Financial:</b> overdue invoices past due date, excluding disputed ones, as % of credit limit. Open is not overdue.</li><li><b>Customer:</b> complaints per 100 service visits against the network median.</li><li><b>Persistence:</b> consecutive months a flag has held. <b>Trend:</b> last 3 months vs the 3 before (↑ worsening, ↓ improving).</li><li><b>Cause:</b> supply-constrained if fulfilment under 75%; weak market if territory registrations fell and share held; dealer execution if supply and market are fine but share falls; otherwise inconclusive.</li><li><b>Tier 1:</b> Concern or worse in 2+ categories, a Critical flag for 3+ months, or top-decile exposure with any flag. <b>Tier 2:</b> a Concern for 2+ months. <b>Tier 3:</b> Watch only. Ageing plus rising overdue moves a dealer up one tier.</li><li><b>Exposure</b> = stock over 60 days at ex-GST cost + non-disputed overdue.</li></ul></div>`;
+const pAss=()=>`<div class="card"><h2>Assumptions and limitations</h2><h3>Confirmed</h3><ul><li>Retail achievement = retail units ÷ assigned target × 100; wholesale kept separate.</li><li>15-day ageing buckets; this prototype flags on the over-60-day share and estimates over-90 as 55% of that.</li><li>Dispatch, receipt and retail sale are distinct; bookings are not sales.</li></ul>
+<h3>Provisional</h3><ul><li>Stock valued at ex-GST acquisition cost (pending accounting validation).</li><li>80% bank / 20% dealer funding and 10% interest, shown at 70/30 and 90/10 too.</li><li>Stock = 1.5 months of target; unit cost ₹5 to 11 lakh; credit limit = 12 lakh per target unit. Synthetic.</li></ul>
+<h3>Open</h3><ul><li>Final thresholds, peer-group definition (this demo compares complaints with the network median) and fairness of targets.</li></ul>
+<h3>Key limitation</h3><p><b>Flags are evidence for a conversation, not proof of cause.</b> Thresholds are judgment-based and must be calibrated on real data.</p>
+<h3>Out of scope</h3><p>CRM funnel (leads to bookings), sentiment, and a CSV upload of real ERP files (a next step).</p>
+<h3>Demo data</h3><p>49 synthetic dealers with planted cases: ${Object.values(KEY).map((k,i)=>`${k} (${DL.filter(d=>d.key==Object.keys(KEY)[i]).length})`).join(', ')}.</p></div>`;
+// ---------- router ----------
+function render(){const h=location.hash||'#triage',p=h.split('/'),t=p[0],nav=[['#triage','Dealer Triage'],['#dealer','Dealer Detail'],['#how','How it works'],['#assump','Assumptions']];
+ document.getElementById('nav').innerHTML=nav.map(n=>`<a href="${n[0]}${n[0]=='#dealer'&&t=='#dealer'?'/'+(p[1]||''):''}" class="${t==n[0]?'on':''}">${n[1]}</a>`).join('');
+ const y=scrollY;try{document.getElementById('app').innerHTML=t=='#dealer'?pDealer(p[1]||triage().find(r=>r.tier===1)?.d.id):t=='#how'?pHow():t=='#assump'?pAss():pTriage()}catch(e){document.getElementById('app').innerHTML='<div class="card">Something went wrong: '+e.message+'</div>'}scrollTo(0,y)}
+addEventListener('hashchange',()=>{scrollTo(0,0);render()});render();
+</script></body></html>
